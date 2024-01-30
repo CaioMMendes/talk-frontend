@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Rubik } from "next/font/google";
 import "./globals.css";
+import Header from "./components/header";
+import Footer from "./components/footer";
 
-const inter = Inter({ subsets: ["latin"] });
+const rubik = Rubik({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Talk",
@@ -15,11 +17,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-br" className="h-fit !min-h-screen max-w-screen-2xl m-auto">
+    <html lang="pt-BR" className="m-auto h-fit !min-h-screen max-w-screen-2xl">
       <body
-        className={`${inter.className} flex h-full !min-h-screen  flex-col flex-1`}
+        className={`${rubik.className} flex h-full !min-h-screen  flex-col `}
       >
-        {children}
+        <Header />
+        <div className="flex  flex-1 ">{children}</div>
+        <Footer />
       </body>
     </html>
   );
