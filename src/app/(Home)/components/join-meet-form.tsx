@@ -4,9 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { joinMeetFormSchema } from "../types/join-meet-types";
-import Input from "@/app/components/ui/input";
-import Button from "@/app/components/ui/button";
-import Label from "@/app/components/ui/label";
+import Input from "@/components/ui/input";
+import Button from "@/components/ui/button";
+import Label from "@/components/ui/label";
 
 const JoinMeetForm = () => {
   type JoinMeetFormData = z.infer<typeof joinMeetFormSchema>;
@@ -28,15 +28,6 @@ const JoinMeetForm = () => {
       onSubmit={handleSubmit(onSubmit)}
       className="flex w-full flex-col items-center  justify-center gap-3 bg-primary-2-dark "
     >
-      <Label labelText="ID:" error={!!errors.id} required>
-        <Input
-          {...register("id")}
-          className="w-full rounded-lg bg-primary-2 py-1 "
-          placeholder="ID da reunião"
-          error={!!errors.id}
-          errorMessage={errors.id?.message}
-        />
-      </Label>
       <Label labelText="Nome:" error={!!errors.name} required>
         <Input
           {...register("name")}
@@ -44,6 +35,15 @@ const JoinMeetForm = () => {
           placeholder="Seu nome"
           error={!!errors.name}
           errorMessage={errors.name?.message}
+        />
+      </Label>
+      <Label labelText="ID:" error={!!errors.id} required>
+        <Input
+          {...register("id")}
+          className="w-full rounded-lg bg-primary-2 py-1 "
+          placeholder="ID da reunião"
+          error={!!errors.id}
+          errorMessage={errors.id?.message}
         />
       </Label>
       <Label labelText="Senha:" error={!!errors.password}>
@@ -61,7 +61,7 @@ const JoinMeetForm = () => {
         Campos com <span className="font-medium text-red-500">*</span> são
         obrigatórios
       </p>
-      <Button variant="button" type="submit" className="w-fit ">
+      <Button variant="button" type="submit" className="w-full ">
         Entrar
       </Button>
     </form>
