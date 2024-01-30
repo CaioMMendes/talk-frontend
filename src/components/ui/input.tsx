@@ -1,15 +1,16 @@
 "use client";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon, SendHorizonalIcon } from "lucide-react";
 import { ComponentPropsWithoutRef, forwardRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 interface InputProps extends ComponentPropsWithoutRef<"input"> {
   error?: boolean;
   errorMessage?: string;
+  sendMessage?: () => void;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, error, errorMessage, type, ...props }, ref) => {
+  ({ className, error, errorMessage, sendMessage, type, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState<"password" | "text">(
       "password",
     );
@@ -36,7 +37,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           />
           {type === "password" && (
             <div
-              className="focus-visible:ring-ring absolute	 right-2 top-1/2 -translate-y-1/2 transform cursor-pointer focus-visible:outline-none focus-visible:ring-1 disabled:cursor-not-allowed disabled:opacity-50"
+              className="absolute right-2	 top-1/2 -translate-y-1/2 transform cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
               onClick={handleShowPassword}
             >
               {showPassword === "password" ? (
@@ -45,6 +46,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 <EyeIcon width={20} height={20} />
               )}
             </div>
+          )}
+          {type === "message" && (
+            <button
+              onClick={sendMessage}
+              className="absolute right-2	 top-1/2 -translate-y-1/2 transform cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <SendHorizonalIcon width={20} height={20} />
+            </button>
           )}
         </div>
         {error && errorMessage && (
