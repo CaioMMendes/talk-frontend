@@ -1,26 +1,20 @@
 "use client";
 
+import { useSocketContext } from "@/app/contexts/socket-context";
 import {
   MicIcon,
   MicOffIcon,
   MonitorIcon,
   MonitorOffIcon,
   PhoneIcon,
-  SendHorizonalIcon,
   VideoIcon,
   VideoOffIcon,
 } from "lucide-react";
-import Button from "../../../components/ui/button";
-import { useContext, useEffect, useState } from "react";
-import ChatMessage from "./components/chat-message";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import Input from "@/components/ui/input";
-import ControlButton from "./components/control-button";
-import { Textarea } from "@/components/ui/textarea";
-import Image from "next/image";
-import { SocketContext, useSocketContext } from "@/app/contexts/socket-context";
-import Chat from "./components/chat";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import Button from "../../../components/ui/button";
+import Chat from "./components/chat";
+import ControlButton from "./components/control-button";
 
 type RoomPageProps = {
   params: {
@@ -30,22 +24,38 @@ type RoomPageProps = {
 
 const RoomPage = ({ params }: RoomPageProps) => {
   const [isMutedOn, setIsMutedOn] = useState(false);
-  const [isCameraOn, setIsCameraOn] = useState(false);
+  const [isCameraOn, setIsCameraOn] = useState(true);
   const [isSharingScreen, setIsSharingScreen] = useState(false);
+  const localStream = useRef<HTMLVideoElement>(null);
   const { socket } = useSocketContext();
   const router = useRouter();
 
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("connect", () => {
+    socket.on("connect", async () => {
       console.log("conectado");
       socket.emit("subscribe", {
         roomId: params.id,
         socketId: socket.id,
       });
+      await initCamera();
     });
+    //eslint-disable-next-line
   }, [socket, params.id]);
+
+  const initCamera = async () => {
+    const video = await navigator.mediaDevices.getUserMedia({
+      video: isCameraOn,
+      audio: {
+        noiseSuppression: true,
+        echoCancellation: true,
+      },
+    });
+    if (localStream.current) {
+      localStream.current.srcObject = video;
+    }
+  };
 
   const handleClickMuted = () => {
     setIsMutedOn((isMutedOn) => !isMutedOn);
@@ -71,9 +81,18 @@ const RoomPage = ({ params }: RoomPageProps) => {
         <div className="flex flex-1 flex-col gap-1 ">
           {/* cameras */}
           <div className="flex w-full flex-1 flex-wrap gap-3 ">
-            <div className="flex h-56 w-56 rounded-lg bg-primary-2-dark"></div>
-            <div className="flex h-56 w-56 rounded-lg bg-primary-2-dark"></div>
-            <div className="flex h-56 w-56 rounded-lg bg-primary-2-dark"></div>
+            <div className="relative flex h-60 rounded-lg bg-primary-2-dark">
+              <video
+                className="h-full w-full rounded-lg"
+                ref={localStream}
+                // src="/video.mp4"
+                autoPlay
+                playsInline
+                // muted
+                // loop
+              ></video>
+              <span className="absolute bottom-2 left-2">caio</span>
+            </div>
           </div>
           {/* id da sala */}
           <div className="flex">
