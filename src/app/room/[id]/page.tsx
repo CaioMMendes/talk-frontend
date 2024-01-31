@@ -20,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import { SocketContext, useSocketContext } from "@/app/contexts/socket-context";
 import Chat from "./components/chat";
+import { useRouter } from "next/navigation";
 
 type RoomPageProps = {
   params: {
@@ -32,6 +33,7 @@ const RoomPage = ({ params }: RoomPageProps) => {
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isSharingScreen, setIsSharingScreen] = useState(false);
   const { socket } = useSocketContext();
+  const router = useRouter();
 
   useEffect(() => {
     if (!socket) return;
@@ -54,18 +56,34 @@ const RoomPage = ({ params }: RoomPageProps) => {
   const handleClickSharingScreen = () => {
     setIsSharingScreen((isSsetIsSharingScreen) => !isSsetIsSharingScreen);
   };
+  const handleLeaveMeet = () => {
+    router.push("/");
+  };
+
+  const handleCopyIdClick = () => {
+    navigator.clipboard.writeText(params.id);
+  };
 
   return (
     <main className="flex w-full items-center justify-center gap-5 p-3 md:p-5">
       {/* Esquerda */}
       <div className="flex h-full w-full flex-col gap-5 rounded-lg">
-        {/* cameras */}
-        <div className="flex w-full flex-1 flex-wrap gap-3 ">
-          <div className="flex h-56 w-56 rounded-lg bg-primary-2-dark"></div>
-          <div className="flex h-56 w-56 rounded-lg bg-primary-2-dark"></div>
-          <div className="flex h-56 w-56 rounded-lg bg-primary-2-dark"></div>
+        <div className="flex flex-1 flex-col gap-1 ">
+          {/* cameras */}
+          <div className="flex w-full flex-1 flex-wrap gap-3 ">
+            <div className="flex h-56 w-56 rounded-lg bg-primary-2-dark"></div>
+            <div className="flex h-56 w-56 rounded-lg bg-primary-2-dark"></div>
+            <div className="flex h-56 w-56 rounded-lg bg-primary-2-dark"></div>
+          </div>
+          {/* id da sala */}
+          <div className="flex">
+            <button type="button" title="Copiar id" onClick={handleCopyIdClick}>
+              <p className="text-sm" id="copy-id">
+                Id da sala: {params.id}
+              </p>
+            </button>
+          </div>
         </div>
-
         {/* Botões */}
         <div className="flex w-full items-center">
           {/* <p>9:00</p> */}
@@ -97,7 +115,11 @@ const RoomPage = ({ params }: RoomPageProps) => {
               titleOff={"Parar de transmitir"}
             />
 
-            <Button variant="button" title="Sair da reunião">
+            <Button
+              variant="button"
+              title="Sair da reunião"
+              onClick={handleLeaveMeet}
+            >
               <PhoneIcon width={24} height={24} />
             </Button>
           </div>
@@ -105,7 +127,7 @@ const RoomPage = ({ params }: RoomPageProps) => {
       </div>
 
       {/* Direita */}
-      <Chat />
+      <Chat roomId={params.id} />
     </main>
   );
 };

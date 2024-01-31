@@ -26,7 +26,7 @@ export default function TextExpander({
     <div className="flex w-full flex-col ">
       <p
         ref={textRef}
-        className={`${!isExpanded ? "line-clamp-4 " : "!w-full"} text-justify `}
+        className={`${!isExpanded ? "line-clamp-4 " : "!w-full"} break-all text-justify `}
       >
         {children}
       </p>
