@@ -21,6 +21,11 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       transports: ["websocket"],
     });
     setSocket(newSocket);
+    return () => {
+      if (socket) {
+        socket.disconnect();
+      }
+    };
   }, []);
 
   return (

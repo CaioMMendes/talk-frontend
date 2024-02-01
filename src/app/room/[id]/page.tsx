@@ -33,14 +33,26 @@ const RoomPage = ({ params }: RoomPageProps) => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on("connect", async () => {
+    // Função para inscrever-se nos eventos
+    const handleConnect = async () => {
       console.log("conectado");
       socket.emit("subscribe", {
         roomId: params.id,
         socketId: socket.id,
       });
       await initCamera();
-    });
+    };
+
+    // Inscreva-se no evento de conexão
+    socket.on("connect", handleConnect);
+
+    // Retorne uma função para desinscrever-se quando o componente for desmontado
+    // return () => {
+    //   console.log("desconectado");
+    //   socket.off("connect", handleConnect);
+    //   // Outras ações de cleanup, se necessário
+    // };
+
     //eslint-disable-next-line
   }, [socket, params.id]);
 

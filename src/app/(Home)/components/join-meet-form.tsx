@@ -46,6 +46,7 @@ const JoinMeetForm = () => {
 
     //todo arrumar isso depois
     // router.push(`/room/${data.id}`);
+
     window.location.href = `/room/${data.id}`;
 
     return console.log(data);
