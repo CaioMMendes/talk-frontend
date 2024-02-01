@@ -23,7 +23,7 @@ const ChatMessage = ({ username, message, time, color }: IChatMessage) => {
   };
 
   return (
-    <div className="flex w-full flex-col  gap-2 rounded-lg bg-primary-2 p-2">
+    <div className="mb-1 flex w-full flex-col gap-2 rounded-lg bg-primary-2 p-2">
       <div className="flex w-full flex-nowrap items-center justify-between gap-2  ">
         <p
           className={`w-32 truncate text-sm ${colorVariants[color as keyof typeof colorVariants]}`}
@@ -31,7 +31,7 @@ const ChatMessage = ({ username, message, time, color }: IChatMessage) => {
           {username}
         </p>
         <p
-          className={`text-xs ${colorVariants[color as keyof typeof colorVariants]}`}
+          className={`text-xs ${colorVariants[color as keyof typeof colorVariants]} pr-2`}
         >
           {time}
         </p>

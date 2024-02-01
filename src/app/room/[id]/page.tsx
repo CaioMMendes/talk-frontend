@@ -93,9 +93,9 @@ const RoomPage = ({ params }: RoomPageProps) => {
         <div className="flex flex-1 flex-col gap-1 ">
           {/* cameras */}
           <div className="flex w-full flex-1 flex-wrap gap-3 ">
-            <div className="relative flex h-60 rounded-lg bg-primary-2-dark">
+            <div className="relative flex h-60 w-full max-w-80 rounded-lg bg-primary-2-dark">
               <video
-                className="h-full w-full rounded-lg"
+                className="h-full w-full rounded-lg object-cover"
                 ref={localStream}
                 // src="/video.mp4"
                 autoPlay

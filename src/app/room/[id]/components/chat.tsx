@@ -56,8 +56,8 @@ const Chat = ({ roomId }: { roomId: string }) => {
 
   return (
     <div className="flex h-full w-80  flex-col gap-2 rounded-lg bg-primary-2-dark p-2">
-      <ScrollArea className="flex max-h-full flex-1 gap-1 ">
-        <div className="flex  w-full  flex-col gap-1 ">
+      <div className="flex h-full max-h-[calc(100vh-11.6rem)] w-full  flex-col gap-1 ">
+        <ScrollArea className=" flex flex-1 gap-1 ">
           {chat.map((chatMessage) => {
             return (
               <ChatMessage
@@ -69,11 +69,11 @@ const Chat = ({ roomId }: { roomId: string }) => {
               />
             );
           })}
-        </div>
-        <div>
-          <ScrollBar orientation="vertical" />
-        </div>
-      </ScrollArea>
+          <div>
+            <ScrollBar orientation="vertical" />
+          </div>
+        </ScrollArea>
+      </div>
 
       <form
         onSubmit={handleSubmit(onSubmit)}
