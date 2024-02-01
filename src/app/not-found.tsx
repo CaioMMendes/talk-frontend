@@ -13,6 +13,7 @@ const NotFoundPage = () => {
             }
             alt="Mike wazowski meme image"
             height={0}
+            unoptimized
             width={0}
             className="h-auto w-full"
             sizes="100vw"
