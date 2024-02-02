@@ -16,6 +16,7 @@ import { useEffect, useRef, useState } from "react";
 import Button from "../../../components/ui/button";
 import Chat from "./components/chat";
 import ControlButton from "./components/control-button";
+import useChatMessageNumber from "@/providers/chat-message-provider";
 
 type RoomPageProps = {
   params: {
@@ -26,6 +27,12 @@ type RoomPageProps = {
 const RoomPage = ({ params }: RoomPageProps) => {
   const [isMutedOn, setIsMutedOn] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(true);
+  const chatmessageNumber = useChatMessageNumber(
+    (state) => state.chatMessageNumber,
+  );
+  const removeMessageNumber = useChatMessageNumber(
+    (state) => state.removeMessageNumber,
+  );
   const [isSharingScreen, setIsSharingScreen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(true);
   const localStream = useRef<HTMLVideoElement>(null);
@@ -86,6 +93,7 @@ const RoomPage = ({ params }: RoomPageProps) => {
 
   const handleIsChatOpenClick = () => {
     setIsChatOpen((isChatOpen) => !isChatOpen);
+    removeMessageNumber();
   };
 
   const handleCopyIdClick = () => {
@@ -175,14 +183,21 @@ const RoomPage = ({ params }: RoomPageProps) => {
         </div>
 
         <div
-          className={`flex h-full w-full items-start ${!isChatOpen ? "   flex-1" : " w-0 "} transform   duration-300`}
+          className={`flex h-full w-full items-start ${!isChatOpen ? " relative  flex-1" : "absolute right-full !h-0 !w-0  p-0"} transform   duration-300`}
           // className={`flex h-full items-start ${isChatOpen ? "origin-center scale-100" : " origin-top-right scale-0"} transform  duration-300`}
         >
+          {!isChatOpen && chatmessageNumber > 0 && (
+            <span
+              className={`absolute left-0 top-0 z-50 flex size-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-primary-4 p-1.5 text-xs leading-none`}
+            >
+              {chatmessageNumber}
+            </span>
+          )}
           <Button
             variant="button"
             title="Abrir chat"
             onClick={handleIsChatOpenClick}
-            className={`${isChatOpen && " absolute right-full !h-0 !w-0 p-0"} transform duration-300`}
+            className={`${isChatOpen && "!h-0 !w-0  transform p-0   duration-300"}`}
           >
             <PanelRightOpenIcon
               size={24}

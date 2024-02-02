@@ -12,6 +12,7 @@ import getTime from "@/app/utils/get-time";
 import { v4 as uuidv4 } from "uuid";
 import { PanelRightCloseIcon } from "lucide-react";
 import Button from "@/components/ui/button";
+import useChatMessageNumber from "@/providers/chat-message-provider";
 
 type ChatFormData = z.infer<typeof chatFormSchema>;
 type ChatTypes = {
@@ -28,6 +29,9 @@ type ChatProps = {
 
 const Chat = ({ roomId, handleIsChatOpenClick, isChatOpen }: ChatProps) => {
   const [chat, setChat] = useState<ChatTypes[] | []>([]);
+  const addMessageNumber = useChatMessageNumber(
+    (state) => state.addMessageNumber,
+  );
   const [color, setColor] = useState("zinc");
   const { socket } = useSocketContext();
   const scrollAreaRef = useRef(null);
@@ -43,6 +47,7 @@ const Chat = ({ roomId, handleIsChatOpenClick, isChatOpen }: ChatProps) => {
   useEffect(() => {
     socket?.on("chat", (data) => {
       setChat((chat) => [...chat, data]);
+      !isChatOpen && addMessageNumber();
     });
     setColor(sessionStorage.getItem("chatColor") || "zinc");
   }, [socket]);

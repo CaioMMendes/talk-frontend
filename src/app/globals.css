@@ -48,9 +48,9 @@
   }
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (min-width: 600px) {
   ::-webkit-scrollbar {
-    width: 0.2rem;
+    width: 0.45rem;
   }
 
   ::-webkit-scrollbar-track {
@@ -61,17 +61,4 @@
     background: #607466;
     border-radius: 999px;
   }
-}
-
-::-webkit-scrollbar {
-  width: 0.45rem;
-}
-
-::-webkit-scrollbar-track {
-  background: #343e3d;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #607466;
-  border-radius: 999px;
 }
