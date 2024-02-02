@@ -18,6 +18,9 @@ const config = {
       },
     },
     extend: {
+      transitionDuration: {
+        "3000": "3000ms",
+      },
       colors: {
         "primary-1": "#343e3d",
         "primary-2": "#607466",

@@ -7,9 +7,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { chatFormSchema } from "../types/chat-types";
 import { useSocketContext } from "@/app/contexts/socket-context";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import getTime from "@/app/utils/get-time";
 import { v4 as uuidv4 } from "uuid";
+import { PanelRightCloseIcon } from "lucide-react";
+import Button from "@/components/ui/button";
 
 type ChatFormData = z.infer<typeof chatFormSchema>;
 type ChatTypes = {
@@ -18,11 +20,17 @@ type ChatTypes = {
   roomId: string;
   time: string;
 };
+type ChatProps = {
+  roomId: string;
+  isChatOpen: boolean;
+  handleIsChatOpenClick: () => void;
+};
 
-const Chat = ({ roomId }: { roomId: string }) => {
+const Chat = ({ roomId, handleIsChatOpenClick, isChatOpen }: ChatProps) => {
   const [chat, setChat] = useState<ChatTypes[] | []>([]);
   const [color, setColor] = useState("zinc");
   const { socket } = useSocketContext();
+  const scrollAreaRef = useRef(null);
   const {
     register,
     handleSubmit,
@@ -50,14 +58,37 @@ const Chat = ({ roomId }: { roomId: string }) => {
       time: time,
     };
 
+    // scrollAreaRef.current && scrollAreaRef.current
+
     socket?.emit("chat", sendMessageToServer);
     setChat((chat) => [...chat, sendMessageToServer]);
   };
 
   return (
-    <div className="flex h-full w-80  flex-col gap-2 rounded-lg bg-primary-2-dark p-2">
-      <div className="flex h-full max-h-[calc(100vh-11.6rem)] w-full  flex-col gap-1 ">
-        <ScrollArea className=" flex flex-1 gap-1 ">
+    <div
+      className={`flex h-full w-80 flex-1 flex-col    rounded-lg bg-primary-2-dark `}
+    >
+      <div
+        className={`relative flex w-full items-center justify-center  border-b border-primary-2 p-2 ${!isChatOpen && "border-none"}`}
+      >
+        <Button
+          title="Fechar chat"
+          onClick={handleIsChatOpenClick}
+          className={`${!isChatOpen && "!size-0 p-0"} absolute left-2 transform duration-300`}
+        >
+          <PanelRightCloseIcon
+            size={24}
+            className={`${!isChatOpen && "!size-0"} transform duration-300`}
+          />
+        </Button>
+        <p
+          className={`${!isChatOpen && "hidden !size-0"} transform duration-300`}
+        >
+          Chat
+        </p>
+      </div>
+      <div className="flex h-full w-full flex-col gap-1  px-2 pt-2 sm:max-h-[calc(100vh-12.55rem)] md:max-h-[calc(100vh-13.55rem)]">
+        <ScrollArea className=" flex flex-1 gap-1 " ref={scrollAreaRef}>
           {chat.map((chatMessage) => {
             return (
               <ChatMessage
@@ -77,16 +108,17 @@ const Chat = ({ roomId }: { roomId: string }) => {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className=" flex  w-full items-center   "
+        className=" flex  w-full items-center  p-2 "
       >
         <Input
-          className="w-full rounded-lg bg-primary-2 py-1 !pr-8"
+          className={`w-full rounded-lg bg-primary-2 py-1 !pr-8 ${!isChatOpen && "hidden"}`}
           placeholder="Mensagem"
           type="message"
           {...register("message")}
           error={!!errors.message}
           errorMessage={errors.message?.message}
           autoComplete="off"
+          isChatOpen={isChatOpen}
         />
         {/* <Textarea className="resize-none">
             <SendHorizonalIcon width={20} height={20} />

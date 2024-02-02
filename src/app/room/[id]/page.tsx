@@ -6,6 +6,7 @@ import {
   MicOffIcon,
   MonitorIcon,
   MonitorOffIcon,
+  PanelRightOpenIcon,
   PhoneIcon,
   VideoIcon,
   VideoOffIcon,
@@ -26,6 +27,7 @@ const RoomPage = ({ params }: RoomPageProps) => {
   const [isMutedOn, setIsMutedOn] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isSharingScreen, setIsSharingScreen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(true);
   const localStream = useRef<HTMLVideoElement>(null);
   const { socket } = useSocketContext();
   const router = useRouter();
@@ -82,14 +84,18 @@ const RoomPage = ({ params }: RoomPageProps) => {
     router.push("/");
   };
 
+  const handleIsChatOpenClick = () => {
+    setIsChatOpen((isChatOpen) => !isChatOpen);
+  };
+
   const handleCopyIdClick = () => {
     navigator.clipboard.writeText(params.id);
   };
 
   return (
-    <main className="flex w-full items-center justify-center gap-5 p-3 md:p-5">
+    <main className=" flex w-full items-center  justify-center p-3 md:p-5 ">
       {/* Esquerda */}
-      <div className="flex h-full w-full flex-col gap-5 rounded-lg">
+      <div className=" flex h-full w-full flex-col gap-5 rounded-lg ">
         <div className="flex flex-1 flex-col gap-1 ">
           {/* cameras */}
           <div className="flex w-full flex-1 flex-wrap gap-3 ">
@@ -158,7 +164,35 @@ const RoomPage = ({ params }: RoomPageProps) => {
       </div>
 
       {/* Direita */}
-      <Chat roomId={params.id} />
+      <div className="relative  ml-5 flex h-full  items-start justify-end  md:w-fit">
+        <div
+          className={`absolute flex h-full md:relative  ${isChatOpen ? "w-80" : " h-0 w-0"} trasnform  duration-300 `}
+          // className={`flex h-full w-80  ${!isChatOpen ? "origin-center scale-100" : " origin-top-right scale-0"} trasnform  duration-300 `}
+        >
+          <Chat
+            roomId={params.id}
+            handleIsChatOpenClick={handleIsChatOpenClick}
+            isChatOpen={isChatOpen}
+          />
+        </div>
+
+        <div
+          className={`flex h-full w-full items-start ${!isChatOpen ? "   flex-1" : "  w-0"} trasnform   duration-300`}
+          // className={`flex h-full items-start ${isChatOpen ? "origin-center scale-100" : " origin-top-right scale-0"} trasnform  duration-300`}
+        >
+          <Button
+            variant="button"
+            title="Abrir chat"
+            onClick={handleIsChatOpenClick}
+            className={`${isChatOpen && " absolute right-full !h-0 !w-0 p-0"} transform duration-300`}
+          >
+            <PanelRightOpenIcon
+              size={24}
+              className={`${isChatOpen && "!size-0"} transform duration-300`}
+            />
+          </Button>
+        </div>
+      </div>
     </main>
   );
 };

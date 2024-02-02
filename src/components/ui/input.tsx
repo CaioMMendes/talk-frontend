@@ -7,10 +7,14 @@ interface InputProps extends ComponentPropsWithoutRef<"input"> {
   error?: boolean;
   errorMessage?: string;
   sendMessage?: () => void;
+  isChatOpen?: boolean;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, error, errorMessage, sendMessage, type, ...props }, ref) => {
+  (
+    { className, error, errorMessage, isChatOpen, sendMessage, type, ...props },
+    ref,
+  ) => {
     const [showPassword, setShowPassword] = useState<"password" | "text">(
       "password",
     );
@@ -50,9 +54,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           {type === "message" && (
             <button
               onClick={sendMessage}
-              className="absolute right-2	 top-1/2 -translate-y-1/2 transform cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              className={`absolute right-2	${!isChatOpen && "!size-0"}  top-1/2 -translate-y-1/2 transform cursor-pointer duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50`}
             >
-              <SendHorizonalIcon width={20} height={20} />
+              <SendHorizonalIcon
+                size={20}
+                className={`${!isChatOpen && "!size-0"} transform duration-300`}
+              />
             </button>
           )}
         </div>

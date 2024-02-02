@@ -26,6 +26,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         socket.disconnect();
       }
     };
+    //eslint-disable-next-line
   }, []);
 
   return (
