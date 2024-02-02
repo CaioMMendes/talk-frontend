@@ -20,7 +20,7 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${rubik.className} m-auto h-fit !min-h-screen max-w-screen-2xl`}
+      className={`${rubik.className} m-auto h-fit !max-h-screen !min-h-screen max-w-screen-2xl `}
     >
       <body className={` flex h-full !min-h-screen  flex-col `}>
         <Header />

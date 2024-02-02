@@ -93,7 +93,7 @@ const RoomPage = ({ params }: RoomPageProps) => {
   };
 
   return (
-    <main className=" flex w-full items-center  justify-center p-3 md:p-5 ">
+    <main className=" relative flex w-full items-center  justify-center p-3 md:p-5 ">
       {/* Esquerda */}
       <div className=" flex h-full w-full flex-col gap-5 rounded-lg ">
         <div className="flex flex-1 flex-col gap-1 ">
@@ -123,8 +123,6 @@ const RoomPage = ({ params }: RoomPageProps) => {
         </div>
         {/* Botões */}
         <div className="flex w-full items-center">
-          {/* <p>9:00</p> */}
-
           <div className="flex flex-1 items-center justify-center gap-2">
             <ControlButton
               state={isMutedOn}
@@ -164,10 +162,10 @@ const RoomPage = ({ params }: RoomPageProps) => {
       </div>
 
       {/* Direita */}
-      <div className="relative  ml-5 flex h-full  items-start justify-end  md:w-fit">
+      <div className="absolute right-0 ml-5 flex h-full items-start justify-end  p-3 md:relative md:w-fit  md:p-0">
         <div
-          className={`absolute flex h-full md:relative  ${isChatOpen ? "w-80" : " h-0 w-0"} trasnform  duration-300 `}
-          // className={`flex h-full w-80  ${!isChatOpen ? "origin-center scale-100" : " origin-top-right scale-0"} trasnform  duration-300 `}
+          className={` flex h-full   ${isChatOpen ? "w-80" : "!h-0 !w-0 p-0"} transform  duration-300 `}
+          // className={`flex h-full w-80  ${!isChatOpen ? "origin-center scale-100" : " origin-top-right scale-0"} transform  duration-300 `}
         >
           <Chat
             roomId={params.id}
@@ -177,8 +175,8 @@ const RoomPage = ({ params }: RoomPageProps) => {
         </div>
 
         <div
-          className={`flex h-full w-full items-start ${!isChatOpen ? "   flex-1" : "  w-0"} trasnform   duration-300`}
-          // className={`flex h-full items-start ${isChatOpen ? "origin-center scale-100" : " origin-top-right scale-0"} trasnform  duration-300`}
+          className={`flex h-full w-full items-start ${!isChatOpen ? "   flex-1" : " w-0 "} transform   duration-300`}
+          // className={`flex h-full items-start ${isChatOpen ? "origin-center scale-100" : " origin-top-right scale-0"} transform  duration-300`}
         >
           <Button
             variant="button"

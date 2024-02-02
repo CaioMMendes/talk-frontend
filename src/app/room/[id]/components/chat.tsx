@@ -69,7 +69,7 @@ const Chat = ({ roomId, handleIsChatOpenClick, isChatOpen }: ChatProps) => {
       className={`flex h-full w-80 flex-1 flex-col    rounded-lg bg-primary-2-dark `}
     >
       <div
-        className={`relative flex w-full items-center justify-center  border-b border-primary-2 p-2 ${!isChatOpen && "border-none"}`}
+        className={`relative flex w-full items-center justify-center  border-b border-primary-2 p-2 ${!isChatOpen && "border-none p-0"}`}
       >
         <Button
           title="Fechar chat"
@@ -87,7 +87,7 @@ const Chat = ({ roomId, handleIsChatOpenClick, isChatOpen }: ChatProps) => {
           Chat
         </p>
       </div>
-      <div className="flex h-full w-full flex-col gap-1  px-2 pt-2 sm:max-h-[calc(100vh-12.55rem)] md:max-h-[calc(100vh-13.55rem)]">
+      <div className="flex h-full max-h-[calc(100vh-12.55rem)] w-full flex-col  gap-1 px-2 pt-2 md:max-h-[calc(100vh-13.75rem)]">
         <ScrollArea className=" flex flex-1 gap-1 " ref={scrollAreaRef}>
           {chat.map((chatMessage) => {
             return (
