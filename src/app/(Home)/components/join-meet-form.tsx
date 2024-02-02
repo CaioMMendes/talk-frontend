@@ -8,12 +8,13 @@ import Input from "@/components/ui/input";
 import Button from "@/components/ui/button";
 import Label from "@/components/ui/label";
 import { useRouter } from "next/navigation";
+import userProvider from "@/providers/user-provider";
 
 type JoinMeetFormData = z.infer<typeof joinMeetFormSchema>;
 
 const JoinMeetForm = () => {
   const router = useRouter();
-
+  const setUser = userProvider((state) => state.setUser);
   const {
     register,
     handleSubmit,
@@ -43,7 +44,7 @@ const JoinMeetForm = () => {
 
     sessionStorage.setItem("username", data.name);
     sessionStorage.setItem("chatColor", userColor);
-
+    setUser({ username: data.name });
     //todo arrumar isso depois
     // router.push(`/room/${data.id}`);
 

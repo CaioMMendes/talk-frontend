@@ -1,6 +1,7 @@
 "use client";
 
 import { useSocketContext } from "@/app/contexts/socket-context";
+import useChatMessageNumber from "@/providers/chat-message-provider";
 import {
   MicIcon,
   MicOffIcon,
@@ -14,15 +15,11 @@ import {
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Button from "../../../components/ui/button";
+import { usePeerConnection } from "../hooks/use-peer-connection";
+import { useSocket } from "../hooks/use-socket";
 import Chat from "./components/chat";
 import ControlButton from "./components/control-button";
-import useChatMessageNumber from "@/providers/chat-message-provider";
-
-type RoomPageProps = {
-  params: {
-    id: string;
-  };
-};
+import { RoomPageProps } from "./types/socket-types";
 
 const RoomPage = ({ params }: RoomPageProps) => {
   const [isMutedOn, setIsMutedOn] = useState(false);
@@ -36,24 +33,26 @@ const RoomPage = ({ params }: RoomPageProps) => {
   const [isSharingScreen, setIsSharingScreen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(true);
   const localStream = useRef<HTMLVideoElement>(null);
+  const { peerConnections, createPeerConnection } = usePeerConnection();
   const { socket } = useSocketContext();
   const router = useRouter();
+  const {
+    handleConnect,
+    handleNewUser,
+    handleNewUserStart,
+    handleOfferAnswer,
+  } = useSocket({ initCamera, paramId: params.id });
 
   useEffect(() => {
     if (!socket) return;
 
-    // Função para inscrever-se nos eventos
-    const handleConnect = async () => {
-      console.log("conectado");
-      socket.emit("subscribe", {
-        roomId: params.id,
-        socketId: socket.id,
-      });
-      await initCamera();
-    };
-
     // Inscreva-se no evento de conexão
     socket.on("connect", handleConnect);
+    //dono da sala
+    socket.on("newUser", (data) => handleNewUser(data));
+    //pessoa que entra depois
+    socket.on("newUserStart", (data) => handleNewUserStart(data));
+    socket.on("sdp", (data) => handleOfferAnswer(data));
 
     // Retorne uma função para desinscrever-se quando o componente for desmontado
     // return () => {
@@ -61,11 +60,16 @@ const RoomPage = ({ params }: RoomPageProps) => {
     //   socket.off("connect", handleConnect);
     //   // Outras ações de cleanup, se necessário
     // };
+  }, [
+    socket,
+    params.id,
+    handleConnect,
+    handleNewUser,
+    handleNewUserStart,
+    handleOfferAnswer,
+  ]);
 
-    //eslint-disable-next-line
-  }, [socket, params.id]);
-
-  const initCamera = async () => {
+  async function initCamera() {
     const video = await navigator.mediaDevices.getUserMedia({
       video: isCameraOn,
       audio: {
@@ -76,7 +80,7 @@ const RoomPage = ({ params }: RoomPageProps) => {
     if (localStream.current) {
       localStream.current.srcObject = video;
     }
-  };
+  }
 
   const handleClickMuted = () => {
     setIsMutedOn((isMutedOn) => !isMutedOn);
@@ -109,7 +113,7 @@ const RoomPage = ({ params }: RoomPageProps) => {
           <div className="flex w-full flex-1 flex-wrap gap-3 ">
             <div className="relative flex h-60 w-full max-w-80 rounded-lg bg-primary-2-dark">
               <video
-                className="h-full w-full rounded-lg object-cover"
+                className="h-full w-full -scale-x-100 rounded-lg  object-cover "
                 ref={localStream}
                 // src="/video.mp4"
                 autoPlay
@@ -188,7 +192,7 @@ const RoomPage = ({ params }: RoomPageProps) => {
         >
           {!isChatOpen && chatmessageNumber > 0 && (
             <span
-              className={`absolute left-0 top-0 z-50 flex size-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-primary-4 p-1.5 text-xs leading-none`}
+              className={`absolute left-0 top-0 z-50 flex size-6 -translate-x-[40%] -translate-y-[30%] items-center justify-center rounded-full bg-primary-4 p-1.5 text-xs leading-none`}
             >
               {chatmessageNumber}
             </span>

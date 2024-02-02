@@ -9,11 +9,13 @@ import { z } from "zod";
 import { registerMeetFormSchema } from "../types/register-meet-types";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
+import userProvider from "@/providers/user-provider";
 
 type RegisterMeetFormData = z.infer<typeof registerMeetFormSchema>;
 
 const RegisterMeetForm = () => {
   const router = useRouter();
+  const setUser = userProvider((state) => state.setUser);
   const {
     register,
     handleSubmit,
@@ -45,9 +47,12 @@ const RegisterMeetForm = () => {
     const userColor = colors[colorNumber as keyof typeof colors];
     sessionStorage.setItem("chatColor", userColor);
     sessionStorage.setItem("username", data.name);
+    setUser({ username: data.name });
+
     //todo arrumar isso depois
     // router.push(`/room/${roomId}`);
     window.location.href = `/room/${roomId}`;
+
     return console.log(data);
   };
 
