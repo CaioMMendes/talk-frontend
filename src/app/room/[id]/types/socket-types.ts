@@ -17,3 +17,9 @@ export type DataOfferAnswerTypes = {
   sender: string;
   description: RTCSessionDescriptionInit;
 };
+
+export type DataIceCandidatesType = {
+  username: string;
+  sender: string;
+  candidate: RTCIceCandidate;
+};

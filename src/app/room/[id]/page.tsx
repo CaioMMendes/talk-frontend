@@ -13,17 +13,33 @@ import {
   VideoOffIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import Button from "../../../components/ui/button";
 import { usePeerConnection } from "../hooks/use-peer-connection";
 import { useSocket } from "../hooks/use-socket";
 import Chat from "./components/chat";
 import ControlButton from "./components/control-button";
 import { RoomPageProps } from "./types/socket-types";
+import { v4 as uuidv4 } from "uuid";
+
+export type setVideoMediaStreamType = Dispatch<
+  SetStateAction<MediaStream | null>
+>;
+export type CameraType = "local" | "remote";
+export type InitCameraTypes =
+  | {
+      type: "local";
+      setVideoMediaStream: (mediaStream: MediaStream) => MediaStream;
+    }
+  | {
+      type: "remote";
+      setVideoMediaStream?: (mediaStream: MediaStream) => undefined;
+    };
 
 const RoomPage = ({ params }: RoomPageProps) => {
   const [isMutedOn, setIsMutedOn] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(true);
+  const [remoteStream, setRemoteStream] = useState<MediaStream[]>([]);
   const chatmessageNumber = useChatMessageNumber(
     (state) => state.chatMessageNumber,
   );
@@ -33,7 +49,10 @@ const RoomPage = ({ params }: RoomPageProps) => {
   const [isSharingScreen, setIsSharingScreen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(true);
   const localStream = useRef<HTMLVideoElement>(null);
-  const { peerConnections, createPeerConnection } = usePeerConnection();
+  const [videoMediaStream, setVideoMediaStream] = useState<MediaStream | null>(
+    null,
+  );
+
   const { socket } = useSocketContext();
   const router = useRouter();
   const {
@@ -41,7 +60,14 @@ const RoomPage = ({ params }: RoomPageProps) => {
     handleNewUser,
     handleNewUserStart,
     handleOfferAnswer,
-  } = useSocket({ initCamera, paramId: params.id });
+    handleIceCandidates,
+  } = useSocket({
+    initCamera,
+    paramId: params.id,
+    videoMediaStream,
+    setRemoteStream,
+    setVideoMediaStream,
+  });
 
   useEffect(() => {
     if (!socket) return;
@@ -53,6 +79,7 @@ const RoomPage = ({ params }: RoomPageProps) => {
     //pessoa que entra depois
     socket.on("newUserStart", (data) => handleNewUserStart(data));
     socket.on("sdp", (data) => handleOfferAnswer(data));
+    socket.on("iceCandidates", (data) => handleIceCandidates(data));
 
     // Retorne uma função para desinscrever-se quando o componente for desmontado
     // return () => {
@@ -60,16 +87,24 @@ const RoomPage = ({ params }: RoomPageProps) => {
     //   socket.off("connect", handleConnect);
     //   // Outras ações de cleanup, se necessário
     // };
+    //eslint-disable-next-line
   }, [
     socket,
-    params.id,
-    handleConnect,
-    handleNewUser,
-    handleNewUserStart,
-    handleOfferAnswer,
+    // params.id,
+    // handleConnect,
+    // handleNewUser,
+    // handleNewUserStart,
+    // handleOfferAnswer,
+    // handleIceCandidates,
   ]);
+  useEffect(() => {
+    console.log(videoMediaStream);
+  }, [videoMediaStream]);
 
-  async function initCamera() {
+  async function initCamera(
+    type: CameraType,
+    setVideoMediaStream?: setVideoMediaStreamType,
+  ): Promise<undefined | MediaStream> {
     const video = await navigator.mediaDevices.getUserMedia({
       video: isCameraOn,
       audio: {
@@ -77,8 +112,15 @@ const RoomPage = ({ params }: RoomPageProps) => {
         echoCancellation: true,
       },
     });
-    if (localStream.current) {
-      localStream.current.srcObject = video;
+    if (type === "local" && typeof setVideoMediaStream === "function") {
+      console.log("entrou local");
+      setVideoMediaStream(video);
+      if (localStream.current) {
+        localStream.current.srcObject = video;
+      }
+    }
+    if (type === "remote") {
+      return video;
     }
   }
 
@@ -123,6 +165,32 @@ const RoomPage = ({ params }: RoomPageProps) => {
               ></video>
               <span className="absolute bottom-2 left-2">caio</span>
             </div>
+            {remoteStream.map((stream) => {
+              {
+                console.log(stream);
+              }
+              return (
+                <div
+                  key={uuidv4()}
+                  className="relative flex h-60 w-full max-w-80 rounded-lg bg-primary-2-dark"
+                >
+                  <video
+                    className="h-full w-full -scale-x-100 rounded-lg  object-cover "
+                    ref={(video) => {
+                      console.log(video?.srcObject);
+                      if (video && video.srcObject !== stream)
+                        video.srcObject = stream;
+                    }}
+                    // src="/video.mp4"
+                    autoPlay
+                    playsInline
+                    // muted
+                    // loop
+                  ></video>
+                  <span className="absolute bottom-2 left-2">caio</span>
+                </div>
+              );
+            })}
           </div>
           {/* id da sala */}
           <div className="flex">

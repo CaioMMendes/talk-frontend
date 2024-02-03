@@ -50,6 +50,7 @@ const Chat = ({ roomId, handleIsChatOpenClick, isChatOpen }: ChatProps) => {
       !isChatOpen && addMessageNumber();
     });
     setColor(sessionStorage.getItem("chatColor") || "zinc");
+    //eslint-disable-next-line
   }, [socket]);
 
   const onSubmit = (data: ChatFormData) => {

@@ -2,32 +2,69 @@
 
 import { useSocketContext } from "@/app/contexts/socket-context";
 import userProvider from "@/providers/user-provider";
-import { useRef } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 
-export const usePeerConnection = () => {
+type UsePeerConnectionType = {
+  setRemoteStream: Dispatch<SetStateAction<MediaStream[]>>;
+};
+
+export const usePeerConnection = ({
+  setRemoteStream,
+}: UsePeerConnectionType) => {
   const peerConnections = useRef<Record<string, RTCPeerConnection>>({});
   const { socket } = useSocketContext();
   const user = userProvider((state) => state.user);
+  // const [remoteStream, setRemoteStream] = useState<MediaStream[]>([]);
 
-  const createPeerConnection = (socketId: string, createOffer: boolean) => {
+  interface IDataStream {
+    id: string;
+    stream: MediaStream;
+    username: string;
+  }
+
+  type CreatePeerConectionProps = {
+    socketId: string;
+    createOffer: boolean;
+    videoMediaStream: MediaStream | null;
+    initCamera: (type: "remote") => Promise<MediaStream | undefined>;
+  };
+
+  const createPeerConnection = async ({
+    socketId,
+    createOffer,
+    videoMediaStream,
+    initCamera,
+  }: CreatePeerConectionProps) => {
     const config = {
       iceServers: [
         {
-          urls: "stun:stn.l.google.com:19302",
+          urls: "stun:stun.l.google.com:19302",
         },
       ],
     };
+
     const peer = new RTCPeerConnection(config);
     peerConnections.current[socketId] = peer;
+    const peerConnection = peerConnections.current[socketId];
 
-    if (createOffer) {
-      createOfferFunction();
+    console.log("videoMediaStream", videoMediaStream);
+    if (videoMediaStream) {
+      console.log("tem media stream", videoMediaStream);
+      videoMediaStream.getTracks().forEach((track) => {
+        peerConnection.addTrack(track, videoMediaStream);
+      });
+    } else {
+      console.log("não tem media stream", videoMediaStream);
+      const video = await initCamera("remote");
+      video
+        ?.getTracks()
+        .forEach((track) => peerConnection.addTrack(track, video));
     }
 
-    async function createOfferFunction() {
-      const peerConnection = peerConnections.current[socketId];
+    if (createOffer) {
       const offer = await peerConnection.createOffer();
       await peerConnection.setLocalDescription(offer);
+      console.log("criando uma oferta");
 
       socket?.emit("sdp", {
         to: socketId,
@@ -36,6 +73,32 @@ export const usePeerConnection = () => {
         description: peerConnection.localDescription,
       });
     }
+
+    peerConnection.ontrack = (event) => {
+      console.log("entrou on track", event.streams);
+      const remoteStream = event.streams[0];
+      console.log(remoteStream);
+      setRemoteStream((prevRemoteStream) => {
+        if (!prevRemoteStream.some((stream) => stream.id === socketId)) {
+          debugger;
+          return [...prevRemoteStream, remoteStream];
+        }
+        debugger;
+        return prevRemoteStream;
+      });
+    };
+
+    peer.onicecandidate = (event) => {
+      console.log("peer ice candidate");
+      if (event?.candidate) {
+        socket?.emit("iceCandidates", {
+          to: socketId,
+          sender: socket.id,
+          candidate: event.candidate,
+          username: user.username,
+        });
+      }
+    };
   };
 
   return { createPeerConnection, peerConnections };
