@@ -11,6 +11,7 @@ import {
   DataSocketTypes,
 } from "../[id]/types/socket-types";
 import { CameraType, setVideoMediaStreamType } from "../[id]/page";
+import { toastSuccess } from "@/app/components/Toastify";
 
 interface IUseSocket {
   paramId: string;
@@ -67,6 +68,7 @@ export const useSocket = ({
 
   //Função para pegar novo usuario conectado
   const handleNewUserStart = (data: DataSenderTypes) => {
+    toastSuccess("Alguém entrou na sala");
     createPeerConnection({
       socketId: data.sender,
       createOffer: true,

@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "./components/header";
 import Footer from "./components/footer";
 import { SocketProvider } from "./contexts/socket-context";
+import ToastProvider from "@/providers/toast";
 
 const rubik = Rubik({ subsets: ["latin"] });
 
@@ -20,12 +21,14 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${rubik.className} m-auto h-fit !max-h-screen !min-h-screen max-w-screen-2xl `}
+      className={`${rubik.className} m-auto h-fit !max-h-screen !min-h-screen w-full`}
     >
       <body className={` flex h-full !min-h-screen  flex-col `}>
         <Header />
         <SocketProvider>
-          <div className="flex  flex-1 ">{children}</div>
+          <ToastProvider>
+            <div className="flex  max-w-screen-2xl flex-1  ">{children}</div>
+          </ToastProvider>
         </SocketProvider>
         <Footer />
       </body>
