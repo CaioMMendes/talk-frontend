@@ -4,10 +4,22 @@ import { useSocketContext } from "@/app/contexts/socket-context";
 import useRemoteStream from "@/providers/remote-stream";
 import userProvider from "@/providers/user-provider";
 import useVideoMediaStream from "@/providers/video-media-stream";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import {
+  Dispatch,
+  MutableRefObject,
+  SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
-export const usePeerConnection = () => {
-  const peerConnections = useRef<Record<string, RTCPeerConnection>>({});
+interface usePeerConnectionProps {
+  peerConnections: MutableRefObject<Record<string, RTCPeerConnection>>;
+}
+
+export const usePeerConnection = ({
+  peerConnections,
+}: usePeerConnectionProps) => {
   const { socket } = useSocketContext();
   const user = userProvider((state) => state.user);
   const { remoteStream, setRemoteStream, addRemoteStream } = useRemoteStream(
@@ -48,14 +60,14 @@ export const usePeerConnection = () => {
     peerConnections.current[socketId] = peer;
     const peerConnection = peerConnections.current[socketId];
 
-    console.log("videoMediaStream", videoMediaStream);
+    // console.log("videoMediaStream", videoMediaStream);
     if (videoMediaStream) {
-      console.log("tem media stream", videoMediaStream);
+      // console.log("tem media stream", videoMediaStream);
       videoMediaStream.getTracks().forEach((track) => {
         peerConnection.addTrack(track, videoMediaStream);
       });
     } else {
-      console.log("não tem media stream", videoMediaStream);
+      // console.log("não tem media stream", videoMediaStream);
       const video = await initCamera("remote");
       video
         ?.getTracks()
@@ -65,7 +77,7 @@ export const usePeerConnection = () => {
     if (createOffer) {
       const offer = await peerConnection.createOffer();
       await peerConnection.setLocalDescription(offer);
-      console.log("criando uma oferta");
+      // console.log("criando uma oferta");
 
       socket?.emit("sdp", {
         to: socketId,
@@ -76,11 +88,11 @@ export const usePeerConnection = () => {
     }
 
     peerConnection.ontrack = (event) => {
-      console.log("entrou on track", event.streams);
+      // console.log("entrou on track", event.streams);
       const remoteStream = event.streams[0];
-      console.log(remoteStream);
-      console.log({ ...remoteStream, id: "asdasdad" });
-      // console.log(MediaStream:{...remoteStream.MediaStream,id:'asdasda'});
+      // console.log(remoteStream);
+      // console.log({ ...remoteStream, id: "asdasdad" });
+      // // console.log(MediaStream:{...remoteStream.MediaStream,id:'asdasda'});
 
       addRemoteStream(remoteStream);
     };

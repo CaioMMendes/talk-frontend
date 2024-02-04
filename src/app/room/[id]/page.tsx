@@ -15,21 +15,24 @@ import {
   VideoOffIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { MutableRefObject, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import Button from "../../../components/ui/button";
 import { useSocket } from "../hooks/use-socket";
 import Chat from "./components/chat";
 import ControlButton from "./components/control-button";
 import { RoomPageProps } from "./types/socket-types";
+import MeetButtons from "./components/meet-buttons";
+import { usePeerConnection } from "../hooks/use-peer-connection";
 
 export type setVideoMediaStreamType = (videoMediaStream: MediaStream) => void;
 
 export type CameraType = "local" | "remote";
 
 const RoomPage = ({ params }: RoomPageProps) => {
-  const [isMutedOn, setIsMutedOn] = useState(false);
-  const [isCameraOn, setIsCameraOn] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(true);
+  const dataIdRef = useRef<string | null>(null);
+  const peerConnections = useRef<Record<string, RTCPeerConnection>>({});
   // const [remoteStream, setRemoteStream] = useState<MediaStream[]>([]);
   const { remoteStream, setRemoteStream } = useRemoteStream((state) => state);
   const chatmessageNumber = useChatMessageNumber(
@@ -38,14 +41,10 @@ const RoomPage = ({ params }: RoomPageProps) => {
   const removeMessageNumber = useChatMessageNumber(
     (state) => state.removeMessageNumber,
   );
-  const [isSharingScreen, setIsSharingScreen] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(true);
-  const localStream = useRef<HTMLVideoElement>(null);
-
-  const { videoMediaStream } = useVideoMediaStream((state) => state);
+  const [isCameraOn, setIsCameraOn] = useState(true);
+  const localStream = useRef<HTMLVideoElement | null>(null);
 
   const { socket } = useSocketContext();
-  const router = useRouter();
   const {
     handleConnect,
     handleNewUser,
@@ -55,6 +54,8 @@ const RoomPage = ({ params }: RoomPageProps) => {
   } = useSocket({
     initCamera,
     paramId: params.id,
+    peerConnections,
+    dataIdRef,
   });
 
   useEffect(() => {
@@ -66,12 +67,14 @@ const RoomPage = ({ params }: RoomPageProps) => {
     socket.on("newUser", (data) => handleNewUser(data));
     //pessoa que entra depois
     socket.on("newUserStart", (data) => handleNewUserStart(data));
-    socket.on("sdp", (data) => handleOfferAnswer(data));
+    socket.on("sdp", async (data) => {
+      handleOfferAnswer(data);
+    });
     socket.on("iceCandidates", (data) => handleIceCandidates(data));
 
     // Retorne uma função para desinscrever-se quando o componente for desmontado
     // return () => {
-    //   console.log("desconectado");
+    // //   console.log("desconectado");
     //   socket.off("connect", handleConnect);
     //   // Outras ações de cleanup, se necessário
     // };
@@ -85,10 +88,9 @@ const RoomPage = ({ params }: RoomPageProps) => {
     // handleOfferAnswer,
     // handleIceCandidates,
   ]);
-  useEffect(() => {
-    console.log(videoMediaStream);
-  }, [videoMediaStream]);
 
+  //todo colocar pra quando a camera começar como false ou se a pessoa não aceitar
+  //todo chamar isso de novo e pegar a camera
   async function initCamera(
     type: CameraType,
     setVideoMediaStream?: setVideoMediaStreamType,
@@ -101,7 +103,7 @@ const RoomPage = ({ params }: RoomPageProps) => {
       },
     });
     if (type === "local" && typeof setVideoMediaStream === "function") {
-      console.log("entrou local");
+      // console.log("entrou local");
       setVideoMediaStream(video);
       if (localStream.current) {
         localStream.current.srcObject = video;
@@ -111,19 +113,6 @@ const RoomPage = ({ params }: RoomPageProps) => {
       return video;
     }
   }
-
-  const handleClickMuted = () => {
-    setIsMutedOn((isMutedOn) => !isMutedOn);
-  };
-  const handleClickCamera = () => {
-    setIsCameraOn((isCameraOn) => !isCameraOn);
-  };
-  const handleClickSharingScreen = () => {
-    setIsSharingScreen((isSsetIsSharingScreen) => !isSsetIsSharingScreen);
-  };
-  const handleLeaveMeet = () => {
-    router.push("/");
-  };
 
   const handleIsChatOpenClick = () => {
     setIsChatOpen((isChatOpen) => !isChatOpen);
@@ -155,7 +144,7 @@ const RoomPage = ({ params }: RoomPageProps) => {
             </div>
             {remoteStream.map((stream) => {
               {
-                console.log(stream);
+                // console.log(stream);
               }
               return (
                 <div
@@ -165,7 +154,7 @@ const RoomPage = ({ params }: RoomPageProps) => {
                   <video
                     className="h-full w-full -scale-x-100 rounded-lg  object-cover "
                     ref={(video) => {
-                      console.log(video?.srcObject);
+                      // console.log(video?.srcObject);
                       if (video && video.srcObject !== stream)
                         video.srcObject = stream;
                     }}
@@ -191,41 +180,13 @@ const RoomPage = ({ params }: RoomPageProps) => {
         </div>
         {/* Botões */}
         <div className="flex w-full items-center">
-          <div className="flex flex-1 items-center justify-center gap-2">
-            <ControlButton
-              state={isMutedOn}
-              IconOn={MicIcon}
-              IconOff={MicOffIcon}
-              onClick={handleClickMuted}
-              titleOn={"Mutar"}
-              titleOff={"Desmutar"}
-            />
-
-            <ControlButton
-              state={isCameraOn}
-              IconOn={VideoIcon}
-              IconOff={VideoOffIcon}
-              onClick={handleClickCamera}
-              titleOn={"Desligar câmera"}
-              titleOff={"Ligar câmera"}
-            />
-            <ControlButton
-              state={isSharingScreen}
-              IconOn={MonitorIcon}
-              IconOff={MonitorOffIcon}
-              onClick={handleClickSharingScreen}
-              titleOn={"Compartilhar tela"}
-              titleOff={"Parar de transmitir"}
-            />
-
-            <Button
-              variant="button"
-              title="Sair da reunião"
-              onClick={handleLeaveMeet}
-            >
-              <PhoneIcon width={24} height={24} />
-            </Button>
-          </div>
+          <MeetButtons
+            isCameraOn={isCameraOn}
+            setIsCameraOn={setIsCameraOn}
+            peerConnections={peerConnections}
+            dataId={dataIdRef}
+            localStream={localStream}
+          />
         </div>
       </div>
 

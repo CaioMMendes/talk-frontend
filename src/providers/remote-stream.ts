@@ -18,7 +18,6 @@ const useRemoteStream = create<IRemoteStream>()((set, get) => ({
     const sameStream = stream.filter(
       (stream) => stream.id === remoteStreams.id,
     );
-    console.log(sameStream);
 
     if (sameStream.length === 0) {
       set((state) => ({

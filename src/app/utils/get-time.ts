@@ -1,3 +1,8 @@
+/**
+ *@return retorma a hora atual
+//  *@param a numero de horas
+ */
+
 export default function getTime() {
   let hours = String(new Date().getHours());
   let minutes = String(new Date().getMinutes());
