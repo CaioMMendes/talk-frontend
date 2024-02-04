@@ -2,6 +2,8 @@
 
 import { useSocketContext } from "@/app/contexts/socket-context";
 import useChatMessageNumber from "@/providers/chat-message-provider";
+import useRemoteStream from "@/providers/remote-stream";
+import useVideoMediaStream from "@/providers/video-media-stream";
 import {
   MicIcon,
   MicOffIcon,
@@ -13,33 +15,23 @@ import {
   VideoOffIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import Button from "../../../components/ui/button";
-import { usePeerConnection } from "../hooks/use-peer-connection";
 import { useSocket } from "../hooks/use-socket";
 import Chat from "./components/chat";
 import ControlButton from "./components/control-button";
 import { RoomPageProps } from "./types/socket-types";
-import { v4 as uuidv4 } from "uuid";
 
-export type setVideoMediaStreamType = Dispatch<
-  SetStateAction<MediaStream | null>
->;
+export type setVideoMediaStreamType = (videoMediaStream: MediaStream) => void;
+
 export type CameraType = "local" | "remote";
-export type InitCameraTypes =
-  | {
-      type: "local";
-      setVideoMediaStream: (mediaStream: MediaStream) => MediaStream;
-    }
-  | {
-      type: "remote";
-      setVideoMediaStream?: (mediaStream: MediaStream) => undefined;
-    };
 
 const RoomPage = ({ params }: RoomPageProps) => {
   const [isMutedOn, setIsMutedOn] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(true);
-  const [remoteStream, setRemoteStream] = useState<MediaStream[]>([]);
+  // const [remoteStream, setRemoteStream] = useState<MediaStream[]>([]);
+  const { remoteStream, setRemoteStream } = useRemoteStream((state) => state);
   const chatmessageNumber = useChatMessageNumber(
     (state) => state.chatMessageNumber,
   );
@@ -49,9 +41,8 @@ const RoomPage = ({ params }: RoomPageProps) => {
   const [isSharingScreen, setIsSharingScreen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(true);
   const localStream = useRef<HTMLVideoElement>(null);
-  const [videoMediaStream, setVideoMediaStream] = useState<MediaStream | null>(
-    null,
-  );
+
+  const { videoMediaStream } = useVideoMediaStream((state) => state);
 
   const { socket } = useSocketContext();
   const router = useRouter();
@@ -64,9 +55,6 @@ const RoomPage = ({ params }: RoomPageProps) => {
   } = useSocket({
     initCamera,
     paramId: params.id,
-    videoMediaStream,
-    setRemoteStream,
-    setVideoMediaStream,
   });
 
   useEffect(() => {

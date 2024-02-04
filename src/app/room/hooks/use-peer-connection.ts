@@ -1,19 +1,21 @@
 "use client";
 
 import { useSocketContext } from "@/app/contexts/socket-context";
+import useRemoteStream from "@/providers/remote-stream";
 import userProvider from "@/providers/user-provider";
+import useVideoMediaStream from "@/providers/video-media-stream";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 
-type UsePeerConnectionType = {
-  setRemoteStream: Dispatch<SetStateAction<MediaStream[]>>;
-};
-
-export const usePeerConnection = ({
-  setRemoteStream,
-}: UsePeerConnectionType) => {
+export const usePeerConnection = () => {
   const peerConnections = useRef<Record<string, RTCPeerConnection>>({});
   const { socket } = useSocketContext();
   const user = userProvider((state) => state.user);
+  const { remoteStream, setRemoteStream, addRemoteStream } = useRemoteStream(
+    (state) => state,
+  );
+  const videoMediaStream = useVideoMediaStream(
+    (state) => state.videoMediaStream,
+  );
   // const [remoteStream, setRemoteStream] = useState<MediaStream[]>([]);
 
   interface IDataStream {
@@ -32,7 +34,6 @@ export const usePeerConnection = ({
   const createPeerConnection = async ({
     socketId,
     createOffer,
-    videoMediaStream,
     initCamera,
   }: CreatePeerConectionProps) => {
     const config = {
@@ -78,18 +79,13 @@ export const usePeerConnection = ({
       console.log("entrou on track", event.streams);
       const remoteStream = event.streams[0];
       console.log(remoteStream);
-      setRemoteStream((prevRemoteStream) => {
-        if (!prevRemoteStream.some((stream) => stream.id === socketId)) {
-          debugger;
-          return [...prevRemoteStream, remoteStream];
-        }
-        debugger;
-        return prevRemoteStream;
-      });
+      console.log({ ...remoteStream, id: "asdasdad" });
+      // console.log(MediaStream:{...remoteStream.MediaStream,id:'asdasda'});
+
+      addRemoteStream(remoteStream);
     };
 
     peer.onicecandidate = (event) => {
-      console.log("peer ice candidate");
       if (event?.candidate) {
         socket?.emit("iceCandidates", {
           to: socketId,

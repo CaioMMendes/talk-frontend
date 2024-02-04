@@ -1,9 +1,12 @@
-import { toast } from "react-toastify";
+import { ToastPosition, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export function toastSuccess(text: string) {
+export function toastSuccess(
+  text: string,
+  position: ToastPosition | undefined = "top-center",
+) {
   return toast.success(text, {
-    position: "top-center",
+    position: position,
     autoClose: 5000,
     hideProgressBar: false,
     closeOnClick: true,
@@ -14,9 +17,12 @@ export function toastSuccess(text: string) {
   });
 }
 
-export function toastError(text: string) {
+export function toastError(
+  text: string,
+  position: ToastPosition | undefined = "top-center",
+) {
   return toast.error(text, {
-    position: "top-center",
+    position: position,
     autoClose: 5000,
     hideProgressBar: false,
     closeOnClick: true,

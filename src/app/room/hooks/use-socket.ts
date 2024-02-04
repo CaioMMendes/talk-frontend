@@ -12,6 +12,7 @@ import {
 } from "../[id]/types/socket-types";
 import { CameraType, setVideoMediaStreamType } from "../[id]/page";
 import { toastSuccess } from "@/app/components/Toastify";
+import useVideoMediaStream from "@/providers/video-media-stream";
 
 interface IUseSocket {
   paramId: string;
@@ -19,22 +20,15 @@ interface IUseSocket {
     type: CameraType,
     setVideoMediaStream?: setVideoMediaStreamType,
   ) => Promise<MediaStream | undefined>;
-  videoMediaStream: MediaStream | null;
-  setRemoteStream: Dispatch<SetStateAction<MediaStream[]>>;
-  setVideoMediaStream: Dispatch<SetStateAction<MediaStream | null>>;
 }
 
-export const useSocket = ({
-  paramId,
-  initCamera,
-  videoMediaStream,
-  setVideoMediaStream,
-  setRemoteStream,
-}: IUseSocket) => {
+export const useSocket = ({ paramId, initCamera }: IUseSocket) => {
   const { socket } = useSocketContext();
-  const { peerConnections, createPeerConnection } = usePeerConnection({
-    setRemoteStream,
-  });
+  const { peerConnections, createPeerConnection } = usePeerConnection();
+
+  const { setVideoMediaStream, videoMediaStream } = useVideoMediaStream(
+    (state) => state,
+  );
 
   const user = userProvider((state) => state.user);
   useEffect(() => {
@@ -53,6 +47,7 @@ export const useSocket = ({
 
   //Função para pegar novo usuario
   const handleNewUser = (data: DataSocketTypes) => {
+    toastSuccess("Alguém entrou na sala");
     console.log("Novo usuário");
     createPeerConnection({
       socketId: data.socketId,
@@ -68,7 +63,6 @@ export const useSocket = ({
 
   //Função para pegar novo usuario conectado
   const handleNewUserStart = (data: DataSenderTypes) => {
-    toastSuccess("Alguém entrou na sala");
     createPeerConnection({
       socketId: data.sender,
       createOffer: true,
@@ -110,7 +104,6 @@ export const useSocket = ({
   //ouvir iceCandidates
   const handleIceCandidates = async (data: DataIceCandidatesType) => {
     const peerConnection = peerConnections.current[data.sender];
-    console.log("ice candidate", peerConnection);
     if (data?.candidate) {
       await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
     }
