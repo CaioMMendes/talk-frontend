@@ -94,7 +94,7 @@ export const usePeerConnection = ({
       // console.log({ ...remoteStream, id: "asdasdad" });
       // // console.log(MediaStream:{...remoteStream.MediaStream,id:'asdasda'});
 
-      addRemoteStream(remoteStream);
+      addRemoteStream({ remoteStream, id: socketId });
     };
 
     peer.onicecandidate = (event) => {
@@ -105,6 +105,29 @@ export const usePeerConnection = ({
           candidate: event.candidate,
           username: user.username,
         });
+      }
+    };
+
+    peerConnection.onsignalingstatechange = (event) => {
+      console.log("entrou onsignalchange");
+      switch (peerConnection.signalingState) {
+        case "closed":
+          setRemoteStream({ id: socketId });
+          break;
+      }
+    };
+
+    peerConnection.onconnectionstatechange = (event) => {
+      console.log("entrou connection change");
+      switch (peerConnection.connectionState) {
+        case "disconnected":
+          setRemoteStream({ id: socketId });
+        case "failed":
+          setRemoteStream({ id: socketId });
+        case "closed":
+          setRemoteStream({ id: socketId });
+
+          break;
       }
     };
   };

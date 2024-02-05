@@ -1,22 +1,37 @@
 "use client";
 import { create } from "zustand";
 
+interface RemoteStream {
+  remoteStream: MediaStream;
+  id: string;
+}
+
 interface IRemoteStream {
-  remoteStream: MediaStream[];
-  setRemoteStream: (remoteStream: MediaStream[]) => void;
-  addRemoteStream: (remoteStream: MediaStream) => void;
+  remoteStream: RemoteStream[];
+  setRemoteStream: ({ id }: { id: string }) => void;
+  addRemoteStream: ({ remoteStream, id }: RemoteStream) => void;
 }
 
 const useRemoteStream = create<IRemoteStream>()((set, get) => ({
   remoteStream: [],
 
-  setRemoteStream: (remoteStreams) => {
-    set((state) => ({ remoteStream: [...remoteStreams] }));
+  setRemoteStream: (id) => {
+    const stream = get().remoteStream;
+    console.log(stream, id);
+    const sameStream = stream.filter((stream) => {
+      console.log(id), stream.id;
+      return stream.id !== id.id;
+    });
+
+    set((state) => ({
+      remoteStream: [...sameStream],
+    }));
   },
+
   addRemoteStream: (remoteStreams) => {
     const stream = get().remoteStream;
     const sameStream = stream.filter(
-      (stream) => stream.id === remoteStreams.id,
+      (stream) => stream.remoteStream.id === remoteStreams.remoteStream.id,
     );
 
     if (sameStream.length === 0) {

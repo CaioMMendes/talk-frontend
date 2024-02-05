@@ -21,6 +21,7 @@ import {
   useState,
 } from "react";
 import ControlButton from "./control-button";
+import { useSocketContext } from "@/app/contexts/socket-context";
 
 type MeetButtonsProps = {
   isCameraOn: boolean;
@@ -41,6 +42,7 @@ export default function MeetButtons({
   const [isSharingScreen, setIsSharingScreen] = useState(false);
   const { videoMediaStream } = useVideoMediaStream((state) => state);
   const router = useRouter();
+  const { socket } = useSocketContext();
 
   const handleClickMuted = () => {
     videoMediaStream?.getAudioTracks().forEach((track) => {
@@ -119,6 +121,13 @@ export default function MeetButtons({
   };
 
   const handleLeaveMeet = () => {
+    videoMediaStream?.getTracks().forEach((track) => {
+      track.stop();
+    });
+    Object.values(peerConnections.current).forEach((peerConnection) => {
+      peerConnection.close();
+    });
+    socket?.disconnect();
     router.push("/");
   };
   useEffect(() => {

@@ -155,8 +155,8 @@ const RoomPage = ({ params }: RoomPageProps) => {
                     className="h-full w-full -scale-x-100 rounded-lg  object-cover "
                     ref={(video) => {
                       // console.log(video?.srcObject);
-                      if (video && video.srcObject !== stream)
-                        video.srcObject = stream;
+                      if (video && video.srcObject !== stream.remoteStream)
+                        video.srcObject = stream.remoteStream;
                     }}
                     // src="/video.mp4"
                     autoPlay
