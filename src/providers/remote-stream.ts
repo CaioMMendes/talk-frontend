@@ -17,9 +17,7 @@ const useRemoteStream = create<IRemoteStream>()((set, get) => ({
 
   setRemoteStream: (id) => {
     const stream = get().remoteStream;
-    console.log(stream, id);
     const sameStream = stream.filter((stream) => {
-      console.log(id), stream.id;
       return stream.id !== id.id;
     });
 
@@ -42,11 +40,3 @@ const useRemoteStream = create<IRemoteStream>()((set, get) => ({
   },
 }));
 export default useRemoteStream;
-
-//    if (!prevRemoteStream.some((stream) => stream.id === socketId)) {
-//           prevRemoteStream.map((stream) => console.log(stream, socketId));
-//           return [...prevRemoteStream, remoteStream];
-//         }
-
-//         return prevRemoteStream;
-//       }

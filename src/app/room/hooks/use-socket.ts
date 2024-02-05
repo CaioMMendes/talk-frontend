@@ -44,24 +44,19 @@ export const useSocket = ({
   );
 
   const user = userProvider((state) => state.user);
-  useEffect(() => {
-    // console.log(videoMediaStream);
-  }, [videoMediaStream]);
+  useEffect(() => {}, [videoMediaStream]);
   // Função para inscrever-se nos eventos
   const handleConnect = async () => {
-    // console.log("conectado");
     socket?.emit("subscribe", {
       roomId: paramId,
       socketId: socket.id,
     });
     await initCamera("local", setVideoMediaStream);
-    // console.log(videoMediaStream);
   };
 
   //Função para pegar novo usuario
   const handleNewUser = (data: DataSocketTypes) => {
     toastSuccess("Alguém entrou na sala");
-    // console.log("Novo usuário");
     createPeerConnection({
       socketId: data.socketId,
       createOffer: false,
@@ -83,20 +78,16 @@ export const useSocket = ({
       videoMediaStream,
       initCamera,
     });
-    // console.log("usuario conectado na sala", data);
   };
 
   //função que recebe a oferta de coneção
   const handleOfferAnswer = async (data: DataOfferAnswerTypes) => {
     const peerConnection = peerConnections.current[data.sender];
-    // console.log(data.description?.type);
     try {
       if (data?.description?.type === "offer") {
         await peerConnection.setRemoteDescription(data.description);
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
-        // console.log("local", peerConnection);
-        // console.log("criando uma resposta");
         socket?.emit("sdp", {
           to: data.sender,
           sender: socket.id,
@@ -104,11 +95,9 @@ export const useSocket = ({
           description: peerConnection.localDescription,
         });
       } else if (data?.description?.type === "answer") {
-        // console.log("ouvindo a oferta");
         await peerConnection.setRemoteDescription(
           new RTCSessionDescription(data.description),
         );
-        // console.log("remote", peerConnection);
       }
     } catch (error) {
       // console.log(error);

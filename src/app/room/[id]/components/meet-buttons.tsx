@@ -1,5 +1,6 @@
 "use client";
 
+import { useSocketContext } from "@/app/contexts/socket-context";
 import Button from "@/components/ui/button";
 import useVideoMediaStream from "@/providers/video-media-stream";
 import {
@@ -15,13 +16,11 @@ import { useRouter } from "next/navigation";
 import {
   Dispatch,
   MutableRefObject,
-  RefObject,
   SetStateAction,
   useEffect,
   useState,
 } from "react";
 import ControlButton from "./control-button";
-import { useSocketContext } from "@/app/contexts/socket-context";
 
 type MeetButtonsProps = {
   isCameraOn: boolean;
